@@ -1,6 +1,6 @@
 import { Textarea } from '@headlessui/react';
 import { UseMutateFunction } from '@tanstack/react-query';
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 interface postFormFields {
@@ -22,8 +22,8 @@ interface postDat {
 }
 
 interface reactionType {
-  likes: number,
-  dislikes: number
+  likes: number;
+  dislikes: number;
 }
 
 interface PostFormElementProps {
@@ -32,160 +32,67 @@ interface PostFormElementProps {
   defaultInputData?: postDat;
 }
 
+const ArrStringToTextLine = (arrString: string[]) => arrString.join('\n');
+const TextLineToArrString = (TextLine: string) => TextLine.split('\n');
 
-const ArrStringToTextLine = (arrString: string[]) => {
-  let formattedString: string = "";
-  for (let i = 0; i < arrString.length; i++) {
-    formattedString += arrString[i];
-    if (i < arrString.length - 1) {
-      formattedString += "\n";
-    }
-  }
-  return formattedString;
-}
+const reformatPostFormFields = (postFieldsData: postFormFields): postDat => ({
+  title: postFieldsData.title,
+  body: postFieldsData.body,
+  tags: TextLineToArrString(postFieldsData.tags),
+  reactions: postFieldsData.reactions,
+  views: postFieldsData.views,
+  userId: postFieldsData.userId,
+});
 
-const TextLineToArrString = (TextLine: string) => {
-  const arrStrings: string[] = [];
-  let temp: string = "";
-  for (let i = 0; i < TextLine.length; i++) {
-    if (TextLine[i] === "\n" || i == TextLine.length - 1) {
-      if(i == TextLine.length - 1) temp += TextLine[i];
-      arrStrings.push(temp);
-      temp = "";
-    } else {
-      temp += TextLine[i];
-    }
-  }
-  return arrStrings;
-}
-
-const reformatPostFormFields = (postFieldsData: postFormFields) => {
-  console.log(postFieldsData.tags);
-  const reformatedPostDat: postDat = {
-    title: postFieldsData.title,
-    body: postFieldsData.body,
-    tags: TextLineToArrString(postFieldsData.tags),
-    reactions: postFieldsData.reactions,
-    views: postFieldsData.views,
-    userId: postFieldsData.userId
-
-  }
-
-  return reformatedPostDat;
-}
-
-const PostForm: React.FC<PostFormElementProps> = (props) => {
+const PostForm: React.FC<PostFormElementProps> = ({ isEdit, mutateFn, defaultInputData }) => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<postFormFields>();
 
   useEffect(() => {
-    if (props.defaultInputData) {
-      setValue("title", props.defaultInputData.title);
-      setValue("body", props.defaultInputData.body);
-      setValue("tags", ArrStringToTextLine(props.defaultInputData.tags));
-      setValue("userId", props.defaultInputData.userId);
+    if (defaultInputData) {
+      setValue("title", defaultInputData.title);
+      setValue("body", defaultInputData.body);
+      setValue("tags", ArrStringToTextLine(defaultInputData.tags));
+      setValue("userId", defaultInputData.userId);
     }
-  }, [props.defaultInputData]);
-
+  }, [defaultInputData, setValue]);
 
   const submitHandler = (data: postFormFields) => {
-    if (props.isEdit) {
-      if (!confirm("Are you sure want to update post data ? ")) return;
-      
-      if(typeof props.defaultInputData?.reactions !== "undefined"){
-        data.reactions = {
-          likes : props.defaultInputData.reactions.likes,
-          dislikes : props.defaultInputData.reactions.dislikes
-        }
-      }
+    if (isEdit && !confirm("Are you sure you want to update the post?")) return;
 
-      if(typeof props.defaultInputData?.views !== "undefined"){
-        data.views = props.defaultInputData.views;
-      }
+    data.reactions = defaultInputData?.reactions || { likes: 0, dislikes: 0 };
+    data.views = defaultInputData?.views || 1;
 
-    } else {
-      data.reactions = {
-        likes : 0,
-        dislikes: 0
-      }
-      data.views = 1;
-    }
-
-
-    const reformatedPostDat = reformatPostFormFields(data);
-    console.log(reformatedPostDat);
-    props.mutateFn(reformatedPostDat);
-  }
-
+    mutateFn(reformatPostFormFields(data));
+  };
 
   return (
-    <>
-      <form className="flex flex-col space-y-5 mx-auto " onSubmit={handleSubmit(submitHandler)}>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-lg font-bold text-gray-700" htmlFor="userId">User ID</label>
-          <input className="rounded-lg" type="number" id="userId" {...register('userId', { required: "User ID is required." })} />
-          {
-            errors.userId && (
-              <p className="text-red-500 italic">{errors.userId.message}</p>
-            )
-          }
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-lg font-bold text-gray-700" htmlFor="title">Post Title</label>
-          <input className="rounded-l-lg w-full" type="text" id="title" {...register('title', { required: "Post title is required." })} />
-          {
-            errors.title && (
-              <p className="text-red-500 italic">{errors.title.message}</p>
-            )
-          }
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-lg font-bold text-gray-700" htmlFor="body">Post Body</label>
-          <Textarea className="rounded-lg h-[10rem]" id="body" {...register('body', { required: "Post body is required." })} ></Textarea>
-          {
-            errors.body && (
-              <p className="text-red-500 italic">{errors.body.message}</p>
-            )
-          }
-        </div>
-
-
-
-        <div className="flex flex-col gap-2">
-          <label className="text-lg font-bold text-gray-700" htmlFor="tags">Post Tags</label>
-          <Textarea className="rounded-lg h-[10rem]" id="tags" {...register('tags', { required: "Post tags is required." })} ></Textarea>
-          {
-            errors.tags && (
-              <p className="text-red-500 italic">{errors.tags.message}</p>
-            )
-          }
-        </div>
-
-
-
-
-        <div className="flex items-center justify-between">
-          {props.isEdit ? (
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Save Post
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Add Post
-            </button>
-          )}
-        </div>
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg space-y-6">
+      <h2 className="text-2xl font-bold text-gray-700">{isEdit ? "Edit Post" : "Create Post"}</h2>
+      <form className="space-y-4" onSubmit={handleSubmit(submitHandler)}>
+        {[
+          { id: "userId", label: "User ID", type: "number" },
+          { id: "title", label: "Post Title", type: "text" },
+        ].map(({ id, label, type }) => (
+          <div key={id} className="flex flex-col gap-1">
+            <label htmlFor={id} className="font-semibold text-gray-700">{label}</label>
+            <input id={id} type={type} {...register(id as keyof postFormFields, { required: `${label} is required.` })} className="border rounded-md p-2 focus:ring-2 focus:ring-indigo-500" />
+            {errors[id as keyof postFormFields] && <p className="text-red-500 text-sm">{errors[id as keyof postFormFields]?.message}</p>}
+          </div>
+        ))}
+        {[
+          { id: "body", label: "Post Body" },
+          { id: "tags", label: "Post Tags" },
+        ].map(({ id, label }) => (
+          <div key={id} className="flex flex-col gap-1">
+            <label htmlFor={id} className="font-semibold text-gray-700">{label}</label>
+            <Textarea id={id} {...register(id as keyof postFormFields, { required: `${label} is required.` })} className="border rounded-md p-2 h-32 focus:ring-2 focus:ring-indigo-500" />
+            {errors[id as keyof postFormFields] && <p className="text-red-500 text-sm">{errors[id as keyof postFormFields]?.message}</p>}
+          </div>
+        ))}
+        <button type="submit" className={`w-full py-2 px-4 rounded-lg font-bold text-white transition ${isEdit ? "bg-blue-500 hover:bg-blue-700" : "bg-green-500 hover:bg-green-700"}`}>{isEdit ? "Save Post" : "Add Post"}</button>
       </form>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default PostForm
+export default PostForm;

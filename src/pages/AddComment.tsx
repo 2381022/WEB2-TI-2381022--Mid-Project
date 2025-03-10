@@ -28,16 +28,16 @@ const AddComment = () => {
     if (isSuccess) {
       navigate("/comments", { replace: true });
     }
-  }, [isSuccess]);
+  }, [isSuccess, navigate]);
 
   return (
-    <div className="relative">
+    <div className="relative bg-gray-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       {isPending && (
-        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
-          <div className="flex items-center bg-white/90 px-6 py-3 rounded-lg shadow-lg">
-            <span className="text-2xl mr-4 text-gray-800">Adding...</span>
+        <div className="absolute inset-0 bg-gray-200/50 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="flex items-center bg-white rounded-lg shadow-md px-6 py-3">
+            <span className="text-lg mr-3 text-gray-700">Adding...</span>
             <svg
-              className="animate-spin h-5 w-5 text-gray-600"
+              className="animate-spin h-5 w-5 text-blue-500"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -59,8 +59,10 @@ const AddComment = () => {
           </div>
         </div>
       )}
-      <h2 className="text-2xl font-bold mb-6 mt-10">Add Comment</h2>
-      <CommentFrom isEdit={false} mutateFn={mutate} />
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add Comment</h2>
+        <CommentFrom isEdit={false} mutateFn={mutate} />
+      </div>
     </div>
     );
 }

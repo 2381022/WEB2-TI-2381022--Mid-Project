@@ -10,10 +10,6 @@ const editProduct = async (data: ProductFormInput, id: string | undefined) => {
 };
 
 const EditProduct = () => {
-  // buat ngambil id dari link
-  // misal linknya udh di setup kyk gini ==> recipe/:id dan current url ==> recipe/12
-  // maka useParam bakalan ngasih object dari semua parameter urlnya
-  // dicth diatas paramter urlnya cmn id, id yg kena return == 12 
   const { id } = useParams();
   const editProductMutation = useMutation({
     mutationFn: (data: ProductFormInput) => editProduct(data, id)
@@ -23,19 +19,21 @@ const EditProduct = () => {
     queryFn: () => fetchProductDetail(id)
   });
   const navigate = useNavigate();
+
   useEffect(() => {
     if (editProductMutation.isSuccess) {
       navigate("/product", { replace: true });
     }
-  }, [editProductMutation.isSuccess]);
+  }, [editProductMutation.isSuccess, navigate]);
+
   return (
-    <div className="relative">
+    <div className="min-h-screen bg-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       {(editProductMutation.isPending || getProductDetail.isFetching) && (
-        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
-          <div className="flex items-center bg-white/90 px-6 py-3 rounded-lg shadow-lg">
-            <span className="text-2xl mr-4 text-gray-800">Loading...</span>
+        <div className="absolute inset-0 bg-white/75 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="flex items-center bg-white rounded-md shadow-lg px-6 py-3">
+            <span className="text-lg mr-3 text-gray-700">Saving...</span>
             <svg
-              className="animate-spin h-5 w-5 text-gray-600"
+              className="animate-spin h-5 w-5 text-blue-500"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -57,12 +55,14 @@ const EditProduct = () => {
           </div>
         </div>
       )}
-      <h2 className="text-2xl font-bold mb-6 mt-10">Edit Product</h2>
-      <ProductForm
-        isEdit={true}
-        mutateFn={editProductMutation.mutate}
-        defaultInputData={getProductDetail.data?.data}
-      />
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Edit Product</h2>
+        <ProductForm
+          isEdit={true}
+          mutateFn={editProductMutation.mutate}
+          defaultInputData={getProductDetail.data?.data}
+        />
+      </div>
     </div>
   );
 };

@@ -23,6 +23,7 @@ const ProductForm: React.FC<ProductFormProps> = (props) => {
     setValue,
     formState: { errors }
   } = useForm<ProductFormInput>();
+
   useEffect(() => {
     if (props.defaultInputData) {
       setValue("title", props.defaultInputData.title);
@@ -31,152 +32,87 @@ const ProductForm: React.FC<ProductFormProps> = (props) => {
       setValue("category", props.defaultInputData.category);
       setValue("price", props.defaultInputData.price);
     }
-  }, [props.defaultInputData]);
+  }, [props.defaultInputData, setValue]);
+
   const onSubmit: SubmitHandler<ProductFormInput> = (data) => {
-    if (props.isEdit) {
-      if (!confirm("Are you sure want to update product data ? ")) {
-        return;
-      }
+    if (props.isEdit && !confirm("Are you sure you want to update product data?")) {
+      return;
     }
     props.mutateFn(data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">Title</label>
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg space-y-6">
+      <div>
+        <label className="block text-gray-700 font-semibold mb-2">Title</label>
         <input
           type="text"
-          id="title"
-          className={
-            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-            (errors.title && "border-red-500")
-          }
+          className={`w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.title ? "border-red-500" : "border-gray-300"}`}
           placeholder="Product Title"
-          {...register("title", { required: true })}
+          {...register("title", { required: "Title is required" })}
         />
-        {errors.title && (
-          <p className="text-red-600 text-xs italic" id="titleError">
-            Title is required.
-          </p>
-        )}
+        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
       </div>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">
-          Description
-        </label>
+      <div>
+        <label className="block text-gray-700 font-semibold mb-2">Description</label>
         <textarea
-          id="description"
-          {...register("description")}
-          className={
-            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-            (errors.description && "border-red-500")
-          }
+          className={`w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.description ? "border-red-500" : "border-gray-300"}`}
           rows={4}
           placeholder="Product Description"
-          {...register("description", { required: true })}
+          {...register("description", { required: "Description is required" })}
         ></textarea>
-
-        {errors.description && (
-          <p className="text-red-600 text-xs italic" id="titleError">
-            Description is required.
-          </p>
-        )}
+        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
       </div>
 
-      <div className="mb-4 relative">
-        <label className="block text-gray-700 font-bold mb-2">Price</label>
-        <div className="flex">
-          <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 rounded-l-md border border-r-0 border-gray-300">
-            $
-          </span>
-          <input
-            type="number"
-            id="price"
-            className={
-              "shadow appearance-none border rounded-r-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-              (errors.price && "border-red-500")
-            }
-            step="0.01" min="0"
-            placeholder="0.00"
-            {...register("price")}
-          />
-          {errors.price && (
-            <p className="text-red-600 text-xs italic" id="titleError">
-              Price is required.
-            </p>
-          )}
-        </div>
+      <div>
+        <label className="block text-gray-700 font-semibold mb-2">Price ($)</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          className={`w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.price ? "border-red-500" : "border-gray-300"}`}
+          placeholder="0.00"
+          {...register("price", { required: "Price is required" })}
+        />
+        {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
       </div>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">Category</label>
+      <div>
+        <label className="block text-gray-700 font-semibold mb-2">Category</label>
         <select
-          id="category"
-          className={
-            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" +
-            (errors.category && "border-red-500")
-          }
-          {...register("category")}
+          className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
+          {...register("category", { required: "Category is required" })}
         >
           <option value="beauty">Beauty</option>
           <option value="fragrance">Fragrance</option>
           <option value="furniture">Furniture</option>
         </select>
-        {errors.category && (
-          <p className="text-red-600 text-xs italic" id="titleError">
-            Category is required.
-          </p>
-        )}
+        {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
       </div>
 
-      <div className="mb-4 relative">
-        <label className="block text-gray-700 font-bold mb-2">
-          Discount Percentage
-        </label>
-        <div className="flex">
-          <input
-            {...register("discountPercentage")}
-            type="number"
-            id="discountPercentage"
-            className={
-              "shadow appearance-none border rounded-l-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" +
-              (errors.category && "border-red-500")
-            }
-            step="0.01"
-            min="0"
-            max="100"
-            placeholder="0"
-          />
-          <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 rounded-r-md border border-l-0 border-gray-300">
-            %
-          </span>
-          {errors.discountPercentage && (
-            <p className="text-red-600 text-xs italic" id="titleError">
-              Discount is required.
-            </p>
-          )}
-        </div>
+      <div>
+        <label className="block text-gray-700 font-semibold mb-2">Discount Percentage (%)</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          max="100"
+          className={`w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.discountPercentage ? "border-red-500" : "border-gray-300"}`}
+          placeholder="0"
+          {...register("discountPercentage", { required: "Discount is required" })}
+        />
+        {errors.discountPercentage && <p className="text-red-500 text-sm mt-1">{errors.discountPercentage.message}</p>}
       </div>
 
-      <div className="flex items-center justify-between">
-        {props.isEdit ? (
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Save Product
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Add Product
-          </button>
-        )}
-      </div>
+      <button
+        type="submit"
+        className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md ${
+          props.isEdit ? "bg-blue-500 hover:bg-blue-600" : "bg-green-500 hover:bg-green-600"
+        }`}
+      >
+        {props.isEdit ? "Save Product" : "Add Product"}
+      </button>
     </form>
   );
 };
